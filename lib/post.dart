@@ -214,19 +214,18 @@ class _CommentsState extends State<Comments> {
   }
 
   Widget _itemBuilder(BuildContext ctx, int i) {
-    if (i.isOdd) {
-      return const Divider();
-    } else if (i > _comments.length) {
-      return null;
-    } else if (i == _comments.length) {
-      return new RaisedButton(
-        child: new Text('load more'),
-        onPressed: _loadNextPage,
-      );
-    } else {
+    if (i < _comments.length) {
       Comment c = _comments[i];
       return new Text('${c.creator}: ${c.body}');
+    } else if (i.isOdd) {
+      return const Divider();
     }
+
+    if (i == _comments.length) {
+      _loadNextPage();
+    }
+
+    return null;
   }
 }
 
@@ -486,13 +485,11 @@ class _PostGridState extends State<PostGrid> {
 
   Widget _itemBuilder(BuildContext ctx, int i) {
     _log.fine('loading post $i');
-    if (i > widget.posts.length) {
+    if (i >= widget.posts.length) {
+      () async {
+        widget.onLoadMore(); // Callback, but force async.
+      }();
       return null;
-    } else if (i == widget.posts.length) {
-      return new RaisedButton(
-        child: new Text('load more'),
-        onPressed: widget.onLoadMore,
-      );
     }
 
     return new PostPreview(widget.posts[i], onPressed: () {
